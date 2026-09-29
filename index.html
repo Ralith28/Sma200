@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>SMA200 Dashboard</title>
 
   <style>
@@ -29,7 +30,7 @@
       border-radius: 18px;
       padding: 22px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
     .label {
@@ -84,83 +85,288 @@
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <h1>SMA200 Dashboard</h1>
+    <h1>SMA200 Dashboard</h1>
 
-  <div class="card">
-    <div class="label">S&P 500</div>
-    <div class="value" id="price">---</div>
-  </div>
-
-  <div class="card">
-    <div class="label">SMA200</div>
-    <div class="small-value" id="sma">---</div>
-  </div>
-
-  <div class="card">
-    <div class="label">Abstand zum SMA200</div>
-    <div class="small-value" id="distance">---</div>
-  </div>
-
-  <div class="card">
-    <div class="label">ZahlGraf-Regel</div>
-    <div id="signal" class="signal neutral">
-      DATEN WERDEN GELADEN
+    <div class="card">
+      <div class="label">S&P 500 / SPY</div>
+      <div class="value" id="price">---</div>
     </div>
+
+    <div class="card">
+      <div class="label">SMA200</div>
+      <div class="small-value" id="sma">---</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Abstand zum SMA200</div>
+      <div class="small-value" id="distance">---</div>
+    </div>
+
+    <div class="card">
+      <div class="label">ZahlGraf-Regel</div>
+
+      <div id="signal" class="signal neutral">
+        DATEN WERDEN GELADEN
+      </div>
+    </div>
+
+    <div class="update">
+      Letzte Aktualisierung:
+      <span id="updated">---</span>
+    </div>
+
   </div>
 
-  <div class="update">
-    Letzte Aktualisierung: <span id="updated">---</span>
-  </div>
 
-</div>
+  <script>
 
-<script>
+    // ============================
+    // EINSTELLUNGEN
+    // ============================
 
-  /*
-    TESTDATEN
+    const API_KEY = "700BBS7NX2KASU5T";
 
-    Diese Werte ersetzen wir im nächsten Schritt
-    durch echte S&P-500-Daten.
-  */
+    // SPY = ETF auf den S&P 500
+    const SYMBOL = "SPY";
 
-  const price = 7670.84;
-  const sma200 = 7209.41;
 
-  document.getElementById("price").textContent =
-    price.toLocaleString("de-DE", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    // ============================
+    // DATEN LADEN
+    // ============================
 
-  document.getElementById("sma").textContent =
-    sma200.toLocaleString("de-DE", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    async function loadData() {
 
-  const distance = ((price - sma200) / sma200) * 100;
+      try {
 
-  document.getElementById("distance").textContent =
-    (distance >= 0 ? "+" : "") +
-    distance.toFixed(2) +
-    " %";
+        const url =
+          `https://www.alphavantage.co/query` +
+          `?function=TIME_SERIES_DAILY` +
+          `&symbol=${SYMBOL}` +
+          `&outputsize=full` +
+          `&apikey=${API_KEY}`;
 
-  const signal = document.getElementById("signal");
 
-  if (price >= sma200) {
-    signal.textContent = "🟢 AMUMBO: EIN";
-    signal.className = "signal invested";
-  } else {
-    signal.textContent = "🔴 AMUMBO: AUS";
-    signal.className = "signal out";
-  }
+        const response = await fetch(url);
 
-  document.getElementById("updated").textContent =
-    new Date().toLocaleString("de-DE");
+        const data = await response.json();
 
-</script>
+
+        // Fehler von Alpha Vantage
+
+        if (data["Error Message"]) {
+
+          throw new Error(
+            data["Error Message"]
+          );
+
+        }
+
+
+        // API-Limit
+
+        if (data["Note"]) {
+
+          throw new Error(
+            "API-Limit erreicht. Bitte später erneut versuchen."
+          );
+
+        }
+
+
+        const series =
+          data["Time Series (Daily)"];
+
+
+        if (!series) {
+
+          throw new Error(
+            "Keine Kursdaten erhalten."
+          );
+
+        }
+
+
+        // ============================
+        // KURSE AUSLESEN
+        // ============================
+
+        const dates =
+          Object.keys(series)
+            .sort()
+            .reverse();
+
+
+        const closes =
+          dates
+            .map(date =>
+              Number(
+                series[date]["4. close"]
+              )
+            )
+            .filter(value =>
+              !isNaN(value)
+            );
+
+
+        // Wir brauchen mindestens 200 Tage
+
+        if (closes.length < 200) {
+
+          throw new Error(
+            "Nicht genügend historische Daten für SMA200."
+          );
+
+        }
+
+
+        // ============================
+        // AKTUELLER KURS
+        // ============================
+
+        const price =
+          closes[0];
+
+
+        // ============================
+        // SMA200
+        // ============================
+
+        const last200 =
+          closes.slice(0, 200);
+
+
+        const sma200 =
+          last200.reduce(
+            (sum, value) =>
+              sum + value,
+            0
+          ) / 200;
+
+
+        // ============================
+        // ABSTAND
+        // ============================
+
+        const distance =
+          ((price - sma200) / sma200) * 100;
+
+
+        // ============================
+        // ANZEIGE
+        // ============================
+
+        document.getElementById(
+          "price"
+        ).textContent =
+          price.toLocaleString(
+            "de-DE",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }
+          );
+
+
+        document.getElementById(
+          "sma"
+        ).textContent =
+          sma200.toLocaleString(
+            "de-DE",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }
+          );
+
+
+        document.getElementById(
+          "distance"
+        ).textContent =
+          (distance >= 0 ? "+" : "") +
+          distance.toFixed(2) +
+          " %";
+
+
+        // ============================
+        // AMUMBO-SIGNAL
+        // ============================
+
+        const signal =
+          document.getElementById(
+            "signal"
+          );
+
+
+        if (price >= sma200) {
+
+          signal.textContent =
+            "🟢 AMUMBO: EIN";
+
+          signal.className =
+            "signal invested";
+
+        } else {
+
+          signal.textContent =
+            "🔴 AMUMBO: AUS";
+
+          signal.className =
+            "signal out";
+
+        }
+
+
+        // ============================
+        // ZEITPUNKT
+        // ============================
+
+        document.getElementById(
+          "updated"
+        ).textContent =
+          new Date().toLocaleString(
+            "de-DE"
+          );
+
+
+      } catch (error) {
+
+
+        console.error(error);
+
+
+        const signal =
+          document.getElementById(
+            "signal"
+          );
+
+
+        signal.textContent =
+          "⚠️ DATENFEHLER";
+
+
+        signal.className =
+          "signal neutral";
+
+
+        document.getElementById(
+          "updated"
+        ).textContent =
+          error.message;
+
+      }
+
+    }
+
+
+    // ============================
+    // APP STARTEN
+    // ============================
+
+    loadData();
+
+  </script>
 
 </body>
 </html>
