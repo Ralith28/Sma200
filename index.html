@@ -25,7 +25,7 @@
     }
 
     .container {
-      max-width: 500px;
+      max-width: 700px;
       margin: auto;
       padding: 20px;
     }
@@ -82,6 +82,51 @@
     .neutral {
       background: #e5e7eb;
       color: #374151;
+    }
+
+    .chart-card {
+      padding-bottom: 18px;
+    }
+
+    .chart-wrapper {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 300px;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .price-dot {
+      background: #111827;
+    }
+
+    .sma-dot {
+      background: #2563eb;
     }
 
     .update {
@@ -175,6 +220,39 @@
     </div>
 
 
+    <!-- ============================= -->
+    <!-- VERLAUF -->
+    <!-- ============================= -->
+
+    <div class="card chart-card">
+
+      <div class="label">
+        Verlauf SPY / SMA200
+      </div>
+
+      <div class="chart-wrapper">
+
+        <canvas id="chart"></canvas>
+
+      </div>
+
+      <div class="legend">
+
+        <span>
+          <span class="dot price-dot"></span>
+          SPY
+        </span>
+
+        <span>
+          <span class="dot sma-dot"></span>
+          SMA200
+        </span>
+
+      </div>
+
+    </div>
+
+
     <div class="update">
 
       Letzte Aktualisierung:
@@ -210,7 +288,7 @@ const SYMBOL =
 
 
 // =====================================================
-// ZAHLEN FORMATIEREN
+// ZAHL FORMATIEREN
 // =====================================================
 
 function formatNumber(value) {
@@ -227,7 +305,7 @@ function formatNumber(value) {
 
 
 // =====================================================
-// FEHLER ANZEIGEN
+// FEHLER
 // =====================================================
 
 function showError(message) {
@@ -276,6 +354,365 @@ function checkApiResponse(data) {
 
 
 // =====================================================
+// CHART ZEICHNEN
+// =====================================================
+
+function drawChart(priceData, smaData) {
+
+  const canvas =
+    document.getElementById("chart");
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  // ---------------------------------------------------
+  // Größe
+  // ---------------------------------------------------
+
+  const width =
+    canvas.clientWidth;
+
+  const height =
+    300;
+
+
+  const pixelRatio =
+    window.devicePixelRatio || 1;
+
+
+  canvas.width =
+    width * pixelRatio;
+
+  canvas.height =
+    height * pixelRatio;
+
+
+  ctx.scale(
+    pixelRatio,
+    pixelRatio
+  );
+
+
+  // ---------------------------------------------------
+  // Letzte 60 gemeinsamen Handelstage
+  // ---------------------------------------------------
+
+  const dates =
+    Object.keys(smaData)
+      .filter(date =>
+        priceData[date]
+      )
+      .sort()
+      .slice(-60);
+
+
+  if (dates.length < 2) {
+
+    return;
+
+  }
+
+
+  const prices =
+    dates.map(date =>
+      Number(
+        priceData[date]["4. close"]
+      )
+    );
+
+
+  const smas =
+    dates.map(date =>
+      Number(
+        smaData[date]["SMA"]
+      )
+    );
+
+
+  // ---------------------------------------------------
+  // Wertebereich
+  // ---------------------------------------------------
+
+  const allValues =
+    prices.concat(smas);
+
+
+  let min =
+    Math.min(...allValues);
+
+  let max =
+    Math.max(...allValues);
+
+
+  const padding =
+    (max - min) * 0.10;
+
+
+  min -= padding;
+  max += padding;
+
+
+  // ---------------------------------------------------
+  // Zeichenbereich
+  // ---------------------------------------------------
+
+  const left =
+    42;
+
+  const right =
+    12;
+
+  const top =
+    15;
+
+  const bottom =
+    30;
+
+
+  const chartWidth =
+    width - left - right;
+
+  const chartHeight =
+    height - top - bottom;
+
+
+  // ---------------------------------------------------
+  // Hintergrund
+  // ---------------------------------------------------
+
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  // ---------------------------------------------------
+  // Horizontale Linien
+  // ---------------------------------------------------
+
+  ctx.strokeStyle =
+    "#e5e7eb";
+
+  ctx.lineWidth =
+    1;
+
+
+  for (
+    let i = 0;
+    i <= 4;
+    i++
+  ) {
+
+    const y =
+      top +
+      (chartHeight / 4) * i;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      left,
+      y
+    );
+
+    ctx.lineTo(
+      width - right,
+      y
+    );
+
+    ctx.stroke();
+
+
+    const value =
+      max -
+      ((max - min) / 4) * i;
+
+
+    ctx.fillStyle =
+      "#9ca3af";
+
+    ctx.font =
+      "11px Arial";
+
+    ctx.textAlign =
+      "right";
+
+    ctx.fillText(
+      value.toFixed(0),
+      left - 6,
+      y + 4
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // Funktion für Y
+  // ---------------------------------------------------
+
+  function yPosition(value) {
+
+    return (
+      top +
+      (
+        (max - value)
+        /
+        (max - min)
+      )
+      *
+      chartHeight
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // Funktion für X
+  // ---------------------------------------------------
+
+  function xPosition(index) {
+
+    return (
+      left +
+      (
+        index /
+        (dates.length - 1)
+      )
+      *
+      chartWidth
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // SPY-Linie
+  // ---------------------------------------------------
+
+  ctx.strokeStyle =
+    "#111827";
+
+  ctx.lineWidth =
+    2.5;
+
+  ctx.beginPath();
+
+
+  prices.forEach(
+    (value, index) => {
+
+      const x =
+        xPosition(index);
+
+      const y =
+        yPosition(value);
+
+
+      if (index === 0) {
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
+      } else {
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
+      }
+
+    }
+  );
+
+
+  ctx.stroke();
+
+
+  // ---------------------------------------------------
+  // SMA200-Linie
+  // ---------------------------------------------------
+
+  ctx.strokeStyle =
+    "#2563eb";
+
+  ctx.lineWidth =
+    2.5;
+
+  ctx.beginPath();
+
+
+  smas.forEach(
+    (value, index) => {
+
+      const x =
+        xPosition(index);
+
+      const y =
+        yPosition(value);
+
+
+      if (index === 0) {
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
+      } else {
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
+      }
+
+    }
+  );
+
+
+  ctx.stroke();
+
+
+  // ---------------------------------------------------
+  // Datum links / rechts
+  // ---------------------------------------------------
+
+  ctx.fillStyle =
+    "#9ca3af";
+
+  ctx.font =
+    "10px Arial";
+
+  ctx.textAlign =
+    "left";
+
+  ctx.fillText(
+    dates[0],
+    left,
+    height - 8
+  );
+
+
+  ctx.textAlign =
+    "right";
+
+  ctx.fillText(
+    dates[dates.length - 1],
+    width - right,
+    height - 8
+  );
+
+}
+
+
+// =====================================================
 // DATEN LADEN
 // =====================================================
 
@@ -285,7 +722,7 @@ async function loadData() {
 
 
     // =================================================
-    // 1. KURS LADEN
+    // KURSE
     // =================================================
 
     const priceUrl =
@@ -353,20 +790,20 @@ async function loadData() {
 
 
     // =================================================
-    // 2. KURZ PAUSE
+    // KURZE PAUSE
     // =================================================
-
-    // Verhindert, dass beide API-Anfragen
-    // gleichzeitig rausgehen.
 
     await new Promise(
       resolve =>
-        setTimeout(resolve, 500)
+        setTimeout(
+          resolve,
+          500
+        )
     );
 
 
     // =================================================
-    // 3. SMA200 LADEN
+    // SMA200
     // =================================================
 
     const smaUrl =
@@ -411,7 +848,7 @@ async function loadData() {
     if (!smaSeries) {
 
       throw new Error(
-        "Alpha Vantage hat keine SMA200-Daten geliefert."
+        "Keine SMA200-Daten erhalten."
       );
 
     }
@@ -436,23 +873,7 @@ async function loadData() {
 
 
     // =================================================
-    // 4. WERTE PRÜFEN
-    // =================================================
-
-    if (
-      !Number.isFinite(price) ||
-      !Number.isFinite(sma200)
-    ) {
-
-      throw new Error(
-        "Ungültige Kursdaten."
-      );
-
-    }
-
-
-    // =================================================
-    // 5. ABSTAND BERECHNEN
+    // BERECHNUNG
     // =================================================
 
     const distance =
@@ -463,7 +884,7 @@ async function loadData() {
 
 
     // =================================================
-    // 6. ANZEIGE
+    // HAUPTWERTE
     // =================================================
 
     document.getElementById(
@@ -487,7 +908,7 @@ async function loadData() {
 
 
     // =================================================
-    // 7. SIGNAL
+    // SIGNAL
     // =================================================
 
     const signal =
@@ -516,7 +937,17 @@ async function loadData() {
 
 
     // =================================================
-    // 8. STATUS
+    // CHART
+    // =================================================
+
+    drawChart(
+      timeSeries,
+      smaSeries
+    );
+
+
+    // =================================================
+    // STATUS
     // =================================================
 
     document.getElementById(
@@ -557,6 +988,18 @@ async function loadData() {
 // =====================================================
 
 loadData();
+
+
+// =====================================================
+// CHART BEI DREHUNG NEU ZEICHNEN
+// =====================================================
+
+window.addEventListener(
+  "resize",
+  () => {
+    loadData();
+  }
+);
 
 
 </script>
