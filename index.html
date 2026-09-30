@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>SMA200 Dashboard</title>
 
   <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -22,41 +32,46 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 25px;
+      margin: 10px 0 25px 0;
+      font-size: 34px;
     }
 
     .card {
       background: white;
-      border-radius: 18px;
-      padding: 22px;
+      border-radius: 20px;
+      padding: 24px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+
+      box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.08);
     }
 
     .label {
       color: #6b7280;
-      font-size: 14px;
+      font-size: 17px;
+      margin-bottom: 8px;
     }
 
     .value {
-      font-size: 36px;
+      font-size: 38px;
       font-weight: bold;
-      margin-top: 5px;
     }
 
     .small-value {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
-      margin-top: 5px;
     }
 
     .signal {
       text-align: center;
-      font-size: 28px;
+      font-size: 25px;
       font-weight: bold;
+
       padding: 20px;
-      border-radius: 15px;
-      margin-top: 10px;
+
+      border-radius: 16px;
+
+      margin-top: 12px;
     }
 
     .invested {
@@ -79,68 +94,194 @@
       color: #6b7280;
       font-size: 13px;
       margin-top: 20px;
+      line-height: 1.5;
     }
+
+    .error {
+      color: #991b1b;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
+
   <div class="container">
+
 
     <h1>SMA200 Dashboard</h1>
 
+
+    <!-- AKTUELLER KURS -->
+
     <div class="card">
-      <div class="label">S&P 500 / SPY</div>
-      <div class="value" id="price">---</div>
+
+      <div class="label">
+        S&P 500 / SPY
+      </div>
+
+      <div
+        class="value"
+        id="price"
+      >
+        ...
+      </div>
+
     </div>
 
+
+    <!-- SMA200 -->
+
     <div class="card">
-      <div class="label">SMA200</div>
-      <div class="small-value" id="sma">---</div>
+
+      <div class="label">
+        SMA200
+      </div>
+
+      <div
+        class="small-value"
+        id="sma"
+      >
+        ...
+      </div>
+
     </div>
 
+
+    <!-- ABSTAND -->
+
     <div class="card">
-      <div class="label">Abstand zum SMA200</div>
-      <div class="small-value" id="distance">---</div>
+
+      <div class="label">
+        Abstand zum SMA200
+      </div>
+
+      <div
+        class="small-value"
+        id="distance"
+      >
+        ...
+      </div>
+
     </div>
 
-    <div class="card">
-      <div class="label">ZahlGraf-Regel</div>
 
-      <div id="signal" class="signal neutral">
+    <!-- SIGNAL -->
+
+    <div class="card">
+
+      <div class="label">
+        ZahlGraf-Regel
+      </div>
+
+      <div
+        id="signal"
+        class="signal neutral"
+      >
         DATEN WERDEN GELADEN
       </div>
+
     </div>
 
+
+    <!-- STATUS -->
+
     <div class="update">
-      Letzte Aktualisierung:
-      <span id="updated">---</span>
+
+      Letzte Aktualisierung:<br>
+
+      <span id="updated">
+        ...
+      </span>
+
+      <div
+        id="error"
+        class="error"
+      ></div>
+
     </div>
+
 
   </div>
 
 
+
   <script>
 
-    // ==========================================
+
+    // =====================================================
     // EINSTELLUNGEN
-    // ==========================================
+    // =====================================================
 
-    const API_KEY = "700BBS7NX2KASU5T";
-    const SYMBOL = "SPY";
+    const API_KEY =
+      "700BBS7NX2KASU5T";
+
+    const SYMBOL =
+      "SPY";
 
 
-    // ==========================================
+    // =====================================================
+    // HILFSFUNKTION
+    // =====================================================
+
+    function formatNumber(value) {
+
+      return Number(value).toLocaleString(
+        "de-DE",
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      );
+
+    }
+
+
+    // =====================================================
+    // FEHLER ANZEIGEN
+    // =====================================================
+
+    function showError(message) {
+
+      document.getElementById(
+        "signal"
+      ).textContent =
+        "⚠️ DATENFEHLER";
+
+
+      document.getElementById(
+        "signal"
+      ).className =
+        "signal neutral";
+
+
+      document.getElementById(
+        "error"
+      ).textContent =
+        message;
+
+    }
+
+
+    // =====================================================
     // DATEN LADEN
-    // ==========================================
+    // =====================================================
 
     async function loadData() {
 
+
       try {
 
-        // --------------------------------------
-        // AKTUELLEN SPY-KURS ABRUFEN
-        // --------------------------------------
+
+        // -------------------------------------------------
+        // 1. AKTUELLEN SPY-KURS HOLEN
+        // -------------------------------------------------
 
         const priceUrl =
           "https://www.alphavantage.co/query" +
@@ -154,44 +295,64 @@
           await fetch(priceUrl);
 
 
+        if (!priceResponse.ok) {
+
+          throw new Error(
+            "HTTP-Fehler beim Kursabruf: " +
+            priceResponse.status
+          );
+
+        }
+
+
         const priceData =
           await priceResponse.json();
 
 
-        // API-Fehler prüfen
+        // -------------------------------------------------
+        // API FEHLER PRÜFEN
+        // -------------------------------------------------
 
-        if (priceData["Error Message"]) {
+        if (
+          priceData["Error Message"]
+        ) {
+
           throw new Error(
-            "Alpha Vantage: " +
             priceData["Error Message"]
           );
+
         }
 
 
-        if (priceData["Note"]) {
+        if (
+          priceData["Note"]
+        ) {
+
           throw new Error(
-            "Alpha-Vantage-Limit erreicht. " +
-            "Bitte später erneut versuchen."
+            "Alpha-Vantage API-Limit erreicht."
           );
+
         }
 
-
-        // Kursreihe
 
         const timeSeries =
-          priceData["Time Series (Daily)"];
+          priceData[
+            "Time Series (Daily)"
+          ];
 
 
         if (!timeSeries) {
+
           throw new Error(
-            "Keine Kursdaten erhalten."
+            "Alpha Vantage hat keine Kursdaten geliefert."
           );
+
         }
 
 
-        // --------------------------------------
-        // NEUESTEN HANDELSTAG ERMITTELN
-        // --------------------------------------
+        // -------------------------------------------------
+        // NEUESTEN HANDELSTAG FINDEN
+        // -------------------------------------------------
 
         const dates =
           Object.keys(timeSeries)
@@ -205,13 +366,15 @@
 
         const price =
           Number(
-            timeSeries[latestDate]["4. close"]
+            timeSeries[
+              latestDate
+            ]["4. close"]
           );
 
 
-        // --------------------------------------
-        // SMA200 ABRUFEN
-        // --------------------------------------
+        // -------------------------------------------------
+        // 2. SMA200 HOLEN
+        // -------------------------------------------------
 
         const smaUrl =
           "https://www.alphavantage.co/query" +
@@ -227,43 +390,64 @@
           await fetch(smaUrl);
 
 
+        if (!smaResponse.ok) {
+
+          throw new Error(
+            "HTTP-Fehler beim SMA-Abruf: " +
+            smaResponse.status
+          );
+
+        }
+
+
         const smaData =
           await smaResponse.json();
 
 
-        // Fehler prüfen
+        // -------------------------------------------------
+        // SMA FEHLER PRÜFEN
+        // -------------------------------------------------
 
-        if (smaData["Error Message"]) {
+        if (
+          smaData["Error Message"]
+        ) {
+
           throw new Error(
-            "SMA-Fehler: " +
             smaData["Error Message"]
           );
+
         }
 
 
-        if (smaData["Note"]) {
+        if (
+          smaData["Note"]
+        ) {
+
           throw new Error(
-            "Alpha-Vantage-Limit erreicht."
+            "Alpha-Vantage API-Limit erreicht."
           );
+
         }
 
-
-        // SMA-Daten
 
         const smaSeries =
-          smaData["Technical Analysis: SMA"];
+          smaData[
+            "Technical Analysis: SMA"
+          ];
 
 
         if (!smaSeries) {
+
           throw new Error(
-            "Keine SMA200-Daten erhalten."
+            "Alpha Vantage hat keine SMA200-Daten geliefert."
           );
+
         }
 
 
-        // --------------------------------------
-        // NEUESTEN SMA200 ERMITTELN
-        // --------------------------------------
+        // -------------------------------------------------
+        // NEUESTEN SMA200 FINDEN
+        // -------------------------------------------------
 
         const smaDates =
           Object.keys(smaSeries)
@@ -277,65 +461,78 @@
 
         const sma200 =
           Number(
-            smaSeries[smaDate]["SMA"]
+            smaSeries[
+              smaDate
+            ]["SMA"]
           );
 
 
-        // --------------------------------------
-        // ABSTAND ZUM SMA200
-        // --------------------------------------
+        // -------------------------------------------------
+        // WERTE PRÜFEN
+        // -------------------------------------------------
+
+        if (
+          !Number.isFinite(price) ||
+          !Number.isFinite(sma200)
+        ) {
+
+          throw new Error(
+            "Ungültige Kurs- oder SMA-Daten."
+          );
+
+        }
+
+
+        // -------------------------------------------------
+        // ABSTAND BERECHNEN
+        // -------------------------------------------------
 
         const distance =
-          ((price - sma200) / sma200) * 100;
+          (
+            (price - sma200)
+            / sma200
+          ) * 100;
 
 
-        // --------------------------------------
+        // -------------------------------------------------
         // KURS ANZEIGEN
-        // --------------------------------------
+        // -------------------------------------------------
 
         document.getElementById(
           "price"
         ).textContent =
-          price.toLocaleString(
-            "de-DE",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            }
-          );
+          formatNumber(price);
 
 
-        // --------------------------------------
+        // -------------------------------------------------
         // SMA200 ANZEIGEN
-        // --------------------------------------
+        // -------------------------------------------------
 
         document.getElementById(
           "sma"
         ).textContent =
-          sma200.toLocaleString(
-            "de-DE",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            }
-          );
+          formatNumber(sma200);
 
 
-        // --------------------------------------
+        // -------------------------------------------------
         // ABSTAND ANZEIGEN
-        // --------------------------------------
+        // -------------------------------------------------
 
         document.getElementById(
           "distance"
         ).textContent =
-          (distance >= 0 ? "+" : "") +
+          (
+            distance >= 0
+              ? "+"
+              : ""
+          ) +
           distance.toFixed(2) +
           " %";
 
 
-        // --------------------------------------
-        // AMUMBO-SIGNAL
-        // --------------------------------------
+        // -------------------------------------------------
+        // SIGNAL
+        // -------------------------------------------------
 
         const signal =
           document.getElementById(
@@ -343,7 +540,9 @@
           );
 
 
-        if (price >= sma200) {
+        if (
+          price >= sma200
+        ) {
 
           signal.textContent =
             "🟢 AMUMBO: EIN";
@@ -358,59 +557,61 @@
 
           signal.className =
             "signal out";
+
         }
 
 
-        // --------------------------------------
+        // -------------------------------------------------
         // AKTUALISIERUNG
-        // --------------------------------------
+        // -------------------------------------------------
 
         document.getElementById(
           "updated"
         ).textContent =
           "Kurs: " +
           latestDate +
-          " | SMA: " +
+          " | SMA200: " +
           smaDate;
 
 
-      } catch (error) {
-
-        console.error(error);
-
-
-        // Fehler anzeigen
-
-        const signal =
-          document.getElementById(
-            "signal"
-          );
-
-
-        signal.textContent =
-          "⚠️ DATENFEHLER";
-
-
-        signal.className =
-          "signal neutral";
-
-
         document.getElementById(
-          "updated"
+          "error"
         ).textContent =
-          error.message;
+          "";
+
+
+      }
+
+
+      catch (error) {
+
+
+        console.error(
+          "SMA200 Fehler:",
+          error
+        );
+
+
+        showError(
+          error.message
+        );
+
+
       }
 
     }
 
 
-    // ==========================================
+    // =====================================================
     // APP STARTEN
-    // ==========================================
+    // =====================================================
 
     loadData();
 
+
   </script>
 
+
 </body>
+
 </html>
