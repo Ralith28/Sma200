@@ -2,275 +2,258 @@
 <html lang="de">
 
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-  <title>SMA200 Dashboard</title>
+<title>SMA200 Dashboard</title>
 
-  <style>
+<style>
 
-    * {
-      box-sizing: border-box;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
 
-    h1 {
-      text-align: center;
-      margin: 10px 0 25px;
-      font-size: 34px;
-    }
+h1 {
+  text-align: center;
+  margin: 10px 0 25px;
+  font-size: 34px;
+}
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    }
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
 
-    .label {
-      color: #6b7280;
-      font-size: 17px;
-      margin-bottom: 8px;
-    }
+.label {
+  color: #6b7280;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
 
-    .value {
-      font-size: 38px;
-      font-weight: bold;
-    }
+.value {
+  font-size: 38px;
+  font-weight: bold;
+}
 
-    .small-value {
-      font-size: 28px;
-      font-weight: bold;
-    }
+.small-value {
+  font-size: 28px;
+  font-weight: bold;
+}
 
-    .signal {
-      text-align: center;
-      font-size: 25px;
-      font-weight: bold;
-      padding: 20px;
-      border-radius: 16px;
-      margin-top: 12px;
-    }
+.signal {
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 16px;
+  margin-top: 12px;
+}
 
-    .invested {
-      background: #dcfce7;
-      color: #166534;
-    }
+.invested {
+  background: #dcfce7;
+  color: #166534;
+}
 
-    .out {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+.out {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
-    .neutral {
-      background: #e5e7eb;
-      color: #374151;
-    }
+.neutral {
+  background: #e5e7eb;
+  color: #374151;
+}
 
-    .chart-card {
-      padding-bottom: 18px;
-    }
+.chart-card {
+  padding-bottom: 18px;
+}
 
-    .chart-wrapper {
-      width: 100%;
-      overflow: hidden;
-    }
+.chart-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: 300px;
-    }
+canvas {
+  display: block;
+  width: 100%;
+  height: 300px;
+}
 
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      margin-top: 12px;
-      font-size: 14px;
-      color: #6b7280;
-    }
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #6b7280;
+}
 
-    .legend span {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
 
-    .price-dot {
-      background: #111827;
-    }
+.price-dot {
+  background: #111827;
+}
 
-    .sma-dot {
-      background: #2563eb;
-    }
+.sma-dot {
+  background: #2563eb;
+}
 
-    .update {
-      text-align: center;
-      color: #6b7280;
-      font-size: 13px;
-      margin-top: 20px;
-      line-height: 1.5;
-    }
+.update {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 20px;
+  line-height: 1.5;
+}
 
-    .error {
-      color: #991b1b;
-      font-size: 14px;
-      margin-top: 10px;
-      text-align: center;
-    }
+.error {
+  color: #991b1b;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
 
-  </style>
-
+</style>
 </head>
 
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>SMA200 Dashboard</h1>
-
-
-    <div class="card">
-
-      <div class="label">
-        S&P 500 / SPY
-      </div>
-
-      <div
-        class="value"
-        id="price"
-      >
-        ...
-      </div>
-
-    </div>
+<h1>SMA200 Dashboard</h1>
 
 
-    <div class="card">
+<div class="card">
 
-      <div class="label">
-        SMA200
-      </div>
+  <div class="label">
+    S&P 500 / SPY
+  </div>
 
-      <div
-        class="small-value"
-        id="sma"
-      >
-        ...
-      </div>
+  <div class="value" id="price">
+    ...
+  </div>
 
-    </div>
+</div>
 
 
-    <div class="card">
+<div class="card">
 
-      <div class="label">
-        Abstand zum SMA200
-      </div>
+  <div class="label">
+    SMA200
+  </div>
 
-      <div
-        class="small-value"
-        id="distance"
-      >
-        ...
-      </div>
+  <div class="small-value" id="sma">
+    ...
+  </div>
 
-    </div>
+</div>
 
 
-    <div class="card">
+<div class="card">
 
-      <div class="label">
-        ZahlGraf-Regel
-      </div>
+  <div class="label">
+    Abstand zum SMA200
+  </div>
 
-      <div
-        id="signal"
-        class="signal neutral"
-      >
-        DATEN WERDEN GELADEN
-      </div>
+  <div class="small-value" id="distance">
+    ...
+  </div>
 
-    </div>
+</div>
 
 
-    <!-- ============================= -->
-    <!-- VERLAUF -->
-    <!-- ============================= -->
+<div class="card">
 
-    <div class="card chart-card">
+  <div class="label">
+    ZahlGraf-Regel
+  </div>
 
-      <div class="label">
-        Verlauf SPY / SMA200
-      </div>
+  <div id="signal"
+       class="signal neutral">
+    DATEN WERDEN GELADEN
+  </div>
 
-      <div class="chart-wrapper">
-
-        <canvas id="chart"></canvas>
-
-      </div>
-
-      <div class="legend">
-
-        <span>
-          <span class="dot price-dot"></span>
-          SPY
-        </span>
-
-        <span>
-          <span class="dot sma-dot"></span>
-          SMA200
-        </span>
-
-      </div>
-
-    </div>
+</div>
 
 
-    <div class="update">
+<!-- VERLAUF -->
 
-      Letzte Aktualisierung:
+<div class="card chart-card">
 
-      <br>
+  <div class="label">
+    Verlauf SPY / SMA200
+  </div>
 
-      <span id="updated">
-        ...
-      </span>
+  <div class="chart-wrapper">
 
-      <div
-        id="error"
-        class="error"
-      ></div>
-
-    </div>
+    <canvas id="chart"></canvas>
 
   </div>
+
+  <div class="legend">
+
+    <span>
+      <span class="dot price-dot"></span>
+      SPY
+    </span>
+
+    <span>
+      <span class="dot sma-dot"></span>
+      SMA200
+    </span>
+
+  </div>
+
+</div>
+
+
+<div class="update">
+
+  Letzte Aktualisierung:
+
+  <br>
+
+  <span id="updated">
+    ...
+  </span>
+
+  <div id="error"
+       class="error">
+  </div>
+
+</div>
+
+</div>
 
 
 <script>
@@ -287,8 +270,13 @@ const SYMBOL =
   "SPY";
 
 
+// Globale Daten für den Chart
+let savedPriceData = null;
+let savedSmaData = null;
+
+
 // =====================================================
-// ZAHL FORMATIEREN
+// FORMAT
 // =====================================================
 
 function formatNumber(value) {
@@ -310,26 +298,20 @@ function formatNumber(value) {
 
 function showError(message) {
 
-  document.getElementById(
-    "signal"
-  ).textContent =
-    "⚠️ DATENFEHLER";
+  document.getElementById("signal")
+    .textContent = "⚠️ DATENFEHLER";
 
-  document.getElementById(
-    "signal"
-  ).className =
-    "signal neutral";
+  document.getElementById("signal")
+    .className = "signal neutral";
 
-  document.getElementById(
-    "error"
-  ).textContent =
-    message;
+  document.getElementById("error")
+    .textContent = message;
 
 }
 
 
 // =====================================================
-// API ANTWORT PRÜFEN
+// API PRÜFEN
 // =====================================================
 
 function checkApiResponse(data) {
@@ -354,10 +336,15 @@ function checkApiResponse(data) {
 
 
 // =====================================================
-// CHART ZEICHNEN
+// CHART
 // =====================================================
 
-function drawChart(priceData, smaData) {
+function drawChart() {
+
+  if (!savedPriceData || !savedSmaData) {
+    return;
+  }
+
 
   const canvas =
     document.getElementById("chart");
@@ -366,10 +353,6 @@ function drawChart(priceData, smaData) {
     canvas.getContext("2d");
 
 
-  // ---------------------------------------------------
-  // Größe
-  // ---------------------------------------------------
-
   const width =
     canvas.clientWidth;
 
@@ -377,47 +360,51 @@ function drawChart(priceData, smaData) {
     300;
 
 
-  const pixelRatio =
+  if (width <= 0) {
+    return;
+  }
+
+
+  const ratio =
     window.devicePixelRatio || 1;
 
 
   canvas.width =
-    width * pixelRatio;
+    width * ratio;
 
   canvas.height =
-    height * pixelRatio;
+    height * ratio;
 
-
-  ctx.scale(
-    pixelRatio,
-    pixelRatio
+  ctx.setTransform(
+    ratio,
+    0,
+    0,
+    ratio,
+    0,
+    0
   );
 
 
-  // ---------------------------------------------------
-  // Letzte 60 gemeinsamen Handelstage
-  // ---------------------------------------------------
+  // Gemeinsame Tage finden
 
   const dates =
-    Object.keys(smaData)
+    Object.keys(savedSmaData)
       .filter(date =>
-        priceData[date]
+        savedPriceData[date]
       )
       .sort()
       .slice(-60);
 
 
   if (dates.length < 2) {
-
     return;
-
   }
 
 
   const prices =
     dates.map(date =>
       Number(
-        priceData[date]["4. close"]
+        savedPriceData[date]["4. close"]
       )
     );
 
@@ -425,49 +412,34 @@ function drawChart(priceData, smaData) {
   const smas =
     dates.map(date =>
       Number(
-        smaData[date]["SMA"]
+        savedSmaData[date]["SMA"]
       )
     );
 
 
-  // ---------------------------------------------------
-  // Wertebereich
-  // ---------------------------------------------------
-
-  const allValues =
+  const values =
     prices.concat(smas);
 
 
   let min =
-    Math.min(...allValues);
+    Math.min(...values);
 
   let max =
-    Math.max(...allValues);
+    Math.max(...values);
 
 
-  const padding =
+  const extra =
     (max - min) * 0.10;
 
 
-  min -= padding;
-  max += padding;
+  min -= extra;
+  max += extra;
 
 
-  // ---------------------------------------------------
-  // Zeichenbereich
-  // ---------------------------------------------------
-
-  const left =
-    42;
-
-  const right =
-    12;
-
-  const top =
-    15;
-
-  const bottom =
-    30;
+  const left = 45;
+  const right = 10;
+  const top = 15;
+  const bottom = 30;
 
 
   const chartWidth =
@@ -477,10 +449,6 @@ function drawChart(priceData, smaData) {
     height - top - bottom;
 
 
-  // ---------------------------------------------------
-  // Hintergrund
-  // ---------------------------------------------------
-
   ctx.clearRect(
     0,
     0,
@@ -489,15 +457,12 @@ function drawChart(priceData, smaData) {
   );
 
 
-  // ---------------------------------------------------
-  // Horizontale Linien
-  // ---------------------------------------------------
+  // Hilfslinien
 
   ctx.strokeStyle =
     "#e5e7eb";
 
-  ctx.lineWidth =
-    1;
+  ctx.lineWidth = 1;
 
 
   for (
@@ -508,7 +473,7 @@ function drawChart(priceData, smaData) {
 
     const y =
       top +
-      (chartHeight / 4) * i;
+      chartHeight * i / 4;
 
 
     ctx.beginPath();
@@ -528,7 +493,7 @@ function drawChart(priceData, smaData) {
 
     const value =
       max -
-      ((max - min) / 4) * i;
+      (max - min) * i / 4;
 
 
     ctx.fillStyle =
@@ -549,54 +514,36 @@ function drawChart(priceData, smaData) {
   }
 
 
-  // ---------------------------------------------------
-  // Funktion für Y
-  // ---------------------------------------------------
-
-  function yPosition(value) {
-
-    return (
-      top +
-      (
-        (max - value)
-        /
-        (max - min)
-      )
-      *
-      chartHeight
-    );
-
-  }
-
-
-  // ---------------------------------------------------
-  // Funktion für X
-  // ---------------------------------------------------
-
-  function xPosition(index) {
+  function getX(index) {
 
     return (
       left +
-      (
-        index /
-        (dates.length - 1)
-      )
-      *
+      index /
+      (dates.length - 1) *
       chartWidth
     );
 
   }
 
 
-  // ---------------------------------------------------
-  // SPY-Linie
-  // ---------------------------------------------------
+  function getY(value) {
+
+    return (
+      top +
+      (max - value) /
+      (max - min) *
+      chartHeight
+    );
+
+  }
+
+
+  // SPY
 
   ctx.strokeStyle =
     "#111827";
 
-  ctx.lineWidth =
-    2.5;
+  ctx.lineWidth = 2.5;
 
   ctx.beginPath();
 
@@ -605,26 +552,16 @@ function drawChart(priceData, smaData) {
     (value, index) => {
 
       const x =
-        xPosition(index);
+        getX(index);
 
       const y =
-        yPosition(value);
+        getY(value);
 
 
       if (index === 0) {
-
-        ctx.moveTo(
-          x,
-          y
-        );
-
+        ctx.moveTo(x, y);
       } else {
-
-        ctx.lineTo(
-          x,
-          y
-        );
-
+        ctx.lineTo(x, y);
       }
 
     }
@@ -634,15 +571,12 @@ function drawChart(priceData, smaData) {
   ctx.stroke();
 
 
-  // ---------------------------------------------------
-  // SMA200-Linie
-  // ---------------------------------------------------
+  // SMA200
 
   ctx.strokeStyle =
     "#2563eb";
 
-  ctx.lineWidth =
-    2.5;
+  ctx.lineWidth = 2.5;
 
   ctx.beginPath();
 
@@ -651,26 +585,16 @@ function drawChart(priceData, smaData) {
     (value, index) => {
 
       const x =
-        xPosition(index);
+        getX(index);
 
       const y =
-        yPosition(value);
+        getY(value);
 
 
       if (index === 0) {
-
-        ctx.moveTo(
-          x,
-          y
-        );
-
+        ctx.moveTo(x, y);
       } else {
-
-        ctx.lineTo(
-          x,
-          y
-        );
-
+        ctx.lineTo(x, y);
       }
 
     }
@@ -680,9 +604,7 @@ function drawChart(priceData, smaData) {
   ctx.stroke();
 
 
-  // ---------------------------------------------------
-  // Datum links / rechts
-  // ---------------------------------------------------
+  // Datum
 
   ctx.fillStyle =
     "#9ca3af";
@@ -720,10 +642,9 @@ async function loadData() {
 
   try {
 
-
-    // =================================================
-    // KURSE
-    // =================================================
+    // -----------------------------------------------
+    // SPY
+    // -----------------------------------------------
 
     const priceUrl =
       "https://www.alphavantage.co/query" +
@@ -751,9 +672,7 @@ async function loadData() {
       await priceResponse.json();
 
 
-    checkApiResponse(
-      priceData
-    );
+    checkApiResponse(priceData);
 
 
     const timeSeries =
@@ -769,6 +688,12 @@ async function loadData() {
       );
 
     }
+
+
+    // Daten für Chart speichern
+
+    savedPriceData =
+      timeSeries;
 
 
     const dates =
@@ -789,9 +714,9 @@ async function loadData() {
       );
 
 
-    // =================================================
-    // KURZE PAUSE
-    // =================================================
+    // -----------------------------------------------
+    // 500 ms Pause
+    // -----------------------------------------------
 
     await new Promise(
       resolve =>
@@ -802,9 +727,9 @@ async function loadData() {
     );
 
 
-    // =================================================
+    // -----------------------------------------------
     // SMA200
-    // =================================================
+    // -----------------------------------------------
 
     const smaUrl =
       "https://www.alphavantage.co/query" +
@@ -823,7 +748,7 @@ async function loadData() {
     if (!smaResponse.ok) {
 
       throw new Error(
-        "SMA-Abruf HTTP-Fehler: " +
+        "SMA HTTP-Fehler: " +
         smaResponse.status
       );
 
@@ -834,9 +759,7 @@ async function loadData() {
       await smaResponse.json();
 
 
-    checkApiResponse(
-      smaData
-    );
+    checkApiResponse(smaData);
 
 
     const smaSeries =
@@ -852,6 +775,12 @@ async function loadData() {
       );
 
     }
+
+
+    // Daten für Chart speichern
+
+    savedSmaData =
+      smaSeries;
 
 
     const smaDates =
@@ -872,9 +801,9 @@ async function loadData() {
       );
 
 
-    // =================================================
-    // BERECHNUNG
-    // =================================================
+    // -----------------------------------------------
+    // Abstand
+    // -----------------------------------------------
 
     const distance =
       (
@@ -883,38 +812,33 @@ async function loadData() {
       ) * 100;
 
 
-    // =================================================
-    // HAUPTWERTE
-    // =================================================
+    // -----------------------------------------------
+    // Anzeige
+    // -----------------------------------------------
 
-    document.getElementById(
-      "price"
-    ).textContent =
+    document.getElementById("price")
+      .textContent =
       formatNumber(price);
 
 
-    document.getElementById(
-      "sma"
-    ).textContent =
+    document.getElementById("sma")
+      .textContent =
       formatNumber(sma200);
 
 
-    document.getElementById(
-      "distance"
-    ).textContent =
+    document.getElementById("distance")
+      .textContent =
       (distance >= 0 ? "+" : "") +
       distance.toFixed(2) +
       " %";
 
 
-    // =================================================
-    // SIGNAL
-    // =================================================
+    // -----------------------------------------------
+    // Regel
+    // -----------------------------------------------
 
     const signal =
-      document.getElementById(
-        "signal"
-      );
+      document.getElementById("signal");
 
 
     if (price >= sma200) {
@@ -936,33 +860,27 @@ async function loadData() {
     }
 
 
-    // =================================================
-    // CHART
-    // =================================================
+    // -----------------------------------------------
+    // Chart
+    // -----------------------------------------------
 
-    drawChart(
-      timeSeries,
-      smaSeries
-    );
+    drawChart();
 
 
-    // =================================================
-    // STATUS
-    // =================================================
+    // -----------------------------------------------
+    // Aktualisierung
+    // -----------------------------------------------
 
-    document.getElementById(
-      "updated"
-    ).textContent =
+    document.getElementById("updated")
+      .textContent =
       "Kurs: " +
       latestDate +
       " | SMA200: " +
       smaDate;
 
 
-    document.getElementById(
-      "error"
-    ).textContent =
-      "";
+    document.getElementById("error")
+      .textContent = "";
 
 
   }
@@ -970,7 +888,6 @@ async function loadData() {
   catch (error) {
 
     console.error(
-      "SMA200 Fehler:",
       error
     );
 
@@ -984,26 +901,23 @@ async function loadData() {
 
 
 // =====================================================
-// START
+// EINMALIG LADEN
 // =====================================================
 
 loadData();
 
 
 // =====================================================
-// CHART BEI DREHUNG NEU ZEICHNEN
+// BEI DISPLAY-ÄNDERUNG NUR CHART NEU ZEICHNEN
+// KEINE NEUE API-ANFRAGE!
 // =====================================================
 
 window.addEventListener(
   "resize",
-  () => {
-    loadData();
-  }
+  drawChart
 );
-
 
 </script>
 
 </body>
-
 </html>
