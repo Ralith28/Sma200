@@ -26,13 +26,13 @@
 
     .container {
       max-width: 500px;
-      margin: 0 auto;
+      margin: auto;
       padding: 20px;
     }
 
     h1 {
       text-align: center;
-      margin: 10px 0 25px 0;
+      margin: 10px 0 25px;
       font-size: 34px;
     }
 
@@ -41,9 +41,7 @@
       border-radius: 20px;
       padding: 24px;
       margin-bottom: 16px;
-
-      box-shadow:
-        0 5px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
     }
 
     .label {
@@ -66,11 +64,8 @@
       text-align: center;
       font-size: 25px;
       font-weight: bold;
-
       padding: 20px;
-
       border-radius: 16px;
-
       margin-top: 12px;
     }
 
@@ -111,14 +106,10 @@
 
 <body>
 
-
   <div class="container">
-
 
     <h1>SMA200 Dashboard</h1>
 
-
-    <!-- AKTUELLER KURS -->
 
     <div class="card">
 
@@ -136,8 +127,6 @@
     </div>
 
 
-    <!-- SMA200 -->
-
     <div class="card">
 
       <div class="label">
@@ -153,8 +142,6 @@
 
     </div>
 
-
-    <!-- ABSTAND -->
 
     <div class="card">
 
@@ -172,8 +159,6 @@
     </div>
 
 
-    <!-- SIGNAL -->
-
     <div class="card">
 
       <div class="label">
@@ -190,11 +175,11 @@
     </div>
 
 
-    <!-- STATUS -->
-
     <div class="update">
 
-      Letzte Aktualisierung:<br>
+      Letzte Aktualisierung:
+
+      <br>
 
       <span id="updated">
         ...
@@ -207,410 +192,374 @@
 
     </div>
 
-
   </div>
 
 
-
-  <script>
-
-
-    // =====================================================
-    // EINSTELLUNGEN
-    // =====================================================
-
-    const API_KEY =
-      "700BBS7NX2KASU5T";
-
-    const SYMBOL =
-      "SPY";
+<script>
 
 
-    // =====================================================
-    // HILFSFUNKTION
-    // =====================================================
+// =====================================================
+// EINSTELLUNGEN
+// =====================================================
 
-    function formatNumber(value) {
+const API_KEY =
+  "700BBS7NX2KASU5T";
 
-      return Number(value).toLocaleString(
-        "de-DE",
-        {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }
+const SYMBOL =
+  "SPY";
+
+
+// =====================================================
+// ZAHLEN FORMATIEREN
+// =====================================================
+
+function formatNumber(value) {
+
+  return Number(value).toLocaleString(
+    "de-DE",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }
+  );
+
+}
+
+
+// =====================================================
+// FEHLER ANZEIGEN
+// =====================================================
+
+function showError(message) {
+
+  document.getElementById(
+    "signal"
+  ).textContent =
+    "⚠️ DATENFEHLER";
+
+  document.getElementById(
+    "signal"
+  ).className =
+    "signal neutral";
+
+  document.getElementById(
+    "error"
+  ).textContent =
+    message;
+
+}
+
+
+// =====================================================
+// API ANTWORT PRÜFEN
+// =====================================================
+
+function checkApiResponse(data) {
+
+  if (data["Error Message"]) {
+
+    throw new Error(
+      data["Error Message"]
+    );
+
+  }
+
+  if (data["Note"]) {
+
+    throw new Error(
+      "Alpha-Vantage API-Limit erreicht."
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// DATEN LADEN
+// =====================================================
+
+async function loadData() {
+
+  try {
+
+
+    // =================================================
+    // 1. KURS LADEN
+    // =================================================
+
+    const priceUrl =
+      "https://www.alphavantage.co/query" +
+      "?function=TIME_SERIES_DAILY" +
+      "&symbol=" + SYMBOL +
+      "&outputsize=compact" +
+      "&apikey=" + API_KEY;
+
+
+    const priceResponse =
+      await fetch(priceUrl);
+
+
+    if (!priceResponse.ok) {
+
+      throw new Error(
+        "Kursabruf HTTP-Fehler: " +
+        priceResponse.status
       );
 
     }
 
 
-    // =====================================================
-    // FEHLER ANZEIGEN
-    // =====================================================
-
-    function showError(message) {
-
-      document.getElementById(
-        "signal"
-      ).textContent =
-        "⚠️ DATENFEHLER";
+    const priceData =
+      await priceResponse.json();
 
 
-      document.getElementById(
-        "signal"
-      ).className =
-        "signal neutral";
+    checkApiResponse(
+      priceData
+    );
 
 
-      document.getElementById(
-        "error"
-      ).textContent =
-        message;
+    const timeSeries =
+      priceData[
+        "Time Series (Daily)"
+      ];
+
+
+    if (!timeSeries) {
+
+      throw new Error(
+        "Keine SPY-Kursdaten erhalten."
+      );
 
     }
 
 
-    // =====================================================
-    // DATEN LADEN
-    // =====================================================
+    const dates =
+      Object.keys(timeSeries)
+        .sort()
+        .reverse();
 
-    async function loadData() {
 
+    const latestDate =
+      dates[0];
 
-      try {
 
+    const price =
+      Number(
+        timeSeries[
+          latestDate
+        ]["4. close"]
+      );
 
-        // -------------------------------------------------
-        // 1. AKTUELLEN SPY-KURS HOLEN
-        // -------------------------------------------------
 
-        const priceUrl =
-          "https://www.alphavantage.co/query" +
-          "?function=TIME_SERIES_DAILY" +
-          "&symbol=" + SYMBOL +
-          "&outputsize=compact" +
-          "&apikey=" + API_KEY;
+    // =================================================
+    // 2. KURZ PAUSE
+    // =================================================
 
+    // Verhindert, dass beide API-Anfragen
+    // gleichzeitig rausgehen.
 
-        const priceResponse =
-          await fetch(priceUrl);
+    await new Promise(
+      resolve =>
+        setTimeout(resolve, 500)
+    );
 
 
-        if (!priceResponse.ok) {
+    // =================================================
+    // 3. SMA200 LADEN
+    // =================================================
 
-          throw new Error(
-            "HTTP-Fehler beim Kursabruf: " +
-            priceResponse.status
-          );
+    const smaUrl =
+      "https://www.alphavantage.co/query" +
+      "?function=SMA" +
+      "&symbol=" + SYMBOL +
+      "&interval=daily" +
+      "&time_period=200" +
+      "&series_type=close" +
+      "&apikey=" + API_KEY;
 
-        }
 
+    const smaResponse =
+      await fetch(smaUrl);
 
-        const priceData =
-          await priceResponse.json();
 
+    if (!smaResponse.ok) {
 
-        // -------------------------------------------------
-        // API FEHLER PRÜFEN
-        // -------------------------------------------------
-
-        if (
-          priceData["Error Message"]
-        ) {
-
-          throw new Error(
-            priceData["Error Message"]
-          );
-
-        }
-
-
-        if (
-          priceData["Note"]
-        ) {
-
-          throw new Error(
-            "Alpha-Vantage API-Limit erreicht."
-          );
-
-        }
-
-
-        const timeSeries =
-          priceData[
-            "Time Series (Daily)"
-          ];
-
-
-        if (!timeSeries) {
-
-          throw new Error(
-            "Alpha Vantage hat keine Kursdaten geliefert."
-          );
-
-        }
-
-
-        // -------------------------------------------------
-        // NEUESTEN HANDELSTAG FINDEN
-        // -------------------------------------------------
-
-        const dates =
-          Object.keys(timeSeries)
-            .sort()
-            .reverse();
-
-
-        const latestDate =
-          dates[0];
-
-
-        const price =
-          Number(
-            timeSeries[
-              latestDate
-            ]["4. close"]
-          );
-
-
-        // -------------------------------------------------
-        // 2. SMA200 HOLEN
-        // -------------------------------------------------
-
-        const smaUrl =
-          "https://www.alphavantage.co/query" +
-          "?function=SMA" +
-          "&symbol=" + SYMBOL +
-          "&interval=daily" +
-          "&time_period=200" +
-          "&series_type=close" +
-          "&apikey=" + API_KEY;
-
-
-        const smaResponse =
-          await fetch(smaUrl);
-
-
-        if (!smaResponse.ok) {
-
-          throw new Error(
-            "HTTP-Fehler beim SMA-Abruf: " +
-            smaResponse.status
-          );
-
-        }
-
-
-        const smaData =
-          await smaResponse.json();
-
-
-        // -------------------------------------------------
-        // SMA FEHLER PRÜFEN
-        // -------------------------------------------------
-
-        if (
-          smaData["Error Message"]
-        ) {
-
-          throw new Error(
-            smaData["Error Message"]
-          );
-
-        }
-
-
-        if (
-          smaData["Note"]
-        ) {
-
-          throw new Error(
-            "Alpha-Vantage API-Limit erreicht."
-          );
-
-        }
-
-
-        const smaSeries =
-          smaData[
-            "Technical Analysis: SMA"
-          ];
-
-
-        if (!smaSeries) {
-
-          throw new Error(
-            "Alpha Vantage hat keine SMA200-Daten geliefert."
-          );
-
-        }
-
-
-        // -------------------------------------------------
-        // NEUESTEN SMA200 FINDEN
-        // -------------------------------------------------
-
-        const smaDates =
-          Object.keys(smaSeries)
-            .sort()
-            .reverse();
-
-
-        const smaDate =
-          smaDates[0];
-
-
-        const sma200 =
-          Number(
-            smaSeries[
-              smaDate
-            ]["SMA"]
-          );
-
-
-        // -------------------------------------------------
-        // WERTE PRÜFEN
-        // -------------------------------------------------
-
-        if (
-          !Number.isFinite(price) ||
-          !Number.isFinite(sma200)
-        ) {
-
-          throw new Error(
-            "Ungültige Kurs- oder SMA-Daten."
-          );
-
-        }
-
-
-        // -------------------------------------------------
-        // ABSTAND BERECHNEN
-        // -------------------------------------------------
-
-        const distance =
-          (
-            (price - sma200)
-            / sma200
-          ) * 100;
-
-
-        // -------------------------------------------------
-        // KURS ANZEIGEN
-        // -------------------------------------------------
-
-        document.getElementById(
-          "price"
-        ).textContent =
-          formatNumber(price);
-
-
-        // -------------------------------------------------
-        // SMA200 ANZEIGEN
-        // -------------------------------------------------
-
-        document.getElementById(
-          "sma"
-        ).textContent =
-          formatNumber(sma200);
-
-
-        // -------------------------------------------------
-        // ABSTAND ANZEIGEN
-        // -------------------------------------------------
-
-        document.getElementById(
-          "distance"
-        ).textContent =
-          (
-            distance >= 0
-              ? "+"
-              : ""
-          ) +
-          distance.toFixed(2) +
-          " %";
-
-
-        // -------------------------------------------------
-        // SIGNAL
-        // -------------------------------------------------
-
-        const signal =
-          document.getElementById(
-            "signal"
-          );
-
-
-        if (
-          price >= sma200
-        ) {
-
-          signal.textContent =
-            "🟢 AMUMBO: EIN";
-
-          signal.className =
-            "signal invested";
-
-        } else {
-
-          signal.textContent =
-            "🔴 AMUMBO: AUS";
-
-          signal.className =
-            "signal out";
-
-        }
-
-
-        // -------------------------------------------------
-        // AKTUALISIERUNG
-        // -------------------------------------------------
-
-        document.getElementById(
-          "updated"
-        ).textContent =
-          "Kurs: " +
-          latestDate +
-          " | SMA200: " +
-          smaDate;
-
-
-        document.getElementById(
-          "error"
-        ).textContent =
-          "";
-
-
-      }
-
-
-      catch (error) {
-
-
-        console.error(
-          "SMA200 Fehler:",
-          error
-        );
-
-
-        showError(
-          error.message
-        );
-
-
-      }
+      throw new Error(
+        "SMA-Abruf HTTP-Fehler: " +
+        smaResponse.status
+      );
 
     }
 
 
-    // =====================================================
-    // APP STARTEN
-    // =====================================================
-
-    loadData();
+    const smaData =
+      await smaResponse.json();
 
 
-  </script>
+    checkApiResponse(
+      smaData
+    );
 
+
+    const smaSeries =
+      smaData[
+        "Technical Analysis: SMA"
+      ];
+
+
+    if (!smaSeries) {
+
+      throw new Error(
+        "Alpha Vantage hat keine SMA200-Daten geliefert."
+      );
+
+    }
+
+
+    const smaDates =
+      Object.keys(smaSeries)
+        .sort()
+        .reverse();
+
+
+    const smaDate =
+      smaDates[0];
+
+
+    const sma200 =
+      Number(
+        smaSeries[
+          smaDate
+        ]["SMA"]
+      );
+
+
+    // =================================================
+    // 4. WERTE PRÜFEN
+    // =================================================
+
+    if (
+      !Number.isFinite(price) ||
+      !Number.isFinite(sma200)
+    ) {
+
+      throw new Error(
+        "Ungültige Kursdaten."
+      );
+
+    }
+
+
+    // =================================================
+    // 5. ABSTAND BERECHNEN
+    // =================================================
+
+    const distance =
+      (
+        (price - sma200)
+        / sma200
+      ) * 100;
+
+
+    // =================================================
+    // 6. ANZEIGE
+    // =================================================
+
+    document.getElementById(
+      "price"
+    ).textContent =
+      formatNumber(price);
+
+
+    document.getElementById(
+      "sma"
+    ).textContent =
+      formatNumber(sma200);
+
+
+    document.getElementById(
+      "distance"
+    ).textContent =
+      (distance >= 0 ? "+" : "") +
+      distance.toFixed(2) +
+      " %";
+
+
+    // =================================================
+    // 7. SIGNAL
+    // =================================================
+
+    const signal =
+      document.getElementById(
+        "signal"
+      );
+
+
+    if (price >= sma200) {
+
+      signal.textContent =
+        "🟢 AMUMBO: EIN";
+
+      signal.className =
+        "signal invested";
+
+    } else {
+
+      signal.textContent =
+        "🔴 AMUMBO: AUS";
+
+      signal.className =
+        "signal out";
+
+    }
+
+
+    // =================================================
+    // 8. STATUS
+    // =================================================
+
+    document.getElementById(
+      "updated"
+    ).textContent =
+      "Kurs: " +
+      latestDate +
+      " | SMA200: " +
+      smaDate;
+
+
+    document.getElementById(
+      "error"
+    ).textContent =
+      "";
+
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "SMA200 Fehler:",
+      error
+    );
+
+    showError(
+      error.message
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// START
+// =====================================================
+
+loadData();
+
+
+</script>
 
 </body>
 
