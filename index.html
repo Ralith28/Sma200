@@ -3,9 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>SMA200 Dashboard</title>
 
@@ -140,6 +138,7 @@ canvas {
   font-size: 14px;
   margin-top: 10px;
   text-align: center;
+  word-break: break-word;
 }
 
 </style>
@@ -198,15 +197,12 @@ canvas {
     ZahlGraf-Regel
   </div>
 
-  <div id="signal"
-       class="signal neutral">
+  <div id="signal" class="signal neutral">
     DATEN WERDEN GELADEN
   </div>
 
 </div>
 
-
-<!-- VERLAUF -->
 
 <div class="card chart-card">
 
@@ -215,9 +211,7 @@ canvas {
   </div>
 
   <div class="chart-wrapper">
-
     <canvas id="chart"></canvas>
-
   </div>
 
   <div class="legend">
@@ -240,16 +234,13 @@ canvas {
 <div class="update">
 
   Letzte Aktualisierung:
-
   <br>
 
   <span id="updated">
     ...
   </span>
 
-  <div id="error"
-       class="error">
-  </div>
+  <div id="error" class="error"></div>
 
 </div>
 
@@ -258,25 +249,24 @@ canvas {
 
 <script>
 
-
 // =====================================================
 // EINSTELLUNGEN
 // =====================================================
 
-const API_KEY =
-  "700BBS7NX2KASU5T";
-
-const SYMBOL =
-  "SPY";
+const API_KEY = "700BBS7NX2KASU5";
+const SYMBOL = "SPY";
 
 
-// Globale Daten für den Chart
+// =====================================================
+// GLOBALE DATEN
+// =====================================================
+
 let savedPriceData = null;
 let savedSmaData = null;
 
 
 // =====================================================
-// FORMAT
+// ZAHLEN FORMATIEREN
 // =====================================================
 
 function formatNumber(value) {
@@ -293,33 +283,33 @@ function formatNumber(value) {
 
 
 // =====================================================
-// FEHLER
+// FEHLER ANZEIGEN
 // =====================================================
 
 function showError(message) {
 
-  document.getElementById("signal")
-    .textContent = "⚠️ DATENFEHLER";
+  document.getElementById("signal").textContent =
+    "⚠️ DATENFEHLER";
 
-  document.getElementById("signal")
-    .className = "signal neutral";
+  document.getElementById("signal").className =
+    "signal neutral";
 
-  document.getElementById("error")
-    .textContent = message;
+  document.getElementById("error").textContent =
+    message;
 
 }
 
 
 // =====================================================
-// API PRÜFEN
+// API-ANTWORT PRÜFEN
 // =====================================================
 
-function checkApiResponse(data) {
+function checkApiResponse(data, name) {
 
   if (data["Error Message"]) {
 
     throw new Error(
-      data["Error Message"]
+      name + ": " + data["Error Message"]
     );
 
   }
@@ -327,7 +317,15 @@ function checkApiResponse(data) {
   if (data["Note"]) {
 
     throw new Error(
-      "Alpha-Vantage API-Limit erreicht."
+      name + ": Alpha-Vantage API-Limit erreicht."
+    );
+
+  }
+
+  if (data["Information"]) {
+
+    throw new Error(
+      name + ": " + data["Information"]
     );
 
   }
@@ -345,13 +343,11 @@ function drawChart() {
     return;
   }
 
-
   const canvas =
     document.getElementById("chart");
 
   const ctx =
     canvas.getContext("2d");
-
 
   const width =
     canvas.clientWidth;
@@ -359,15 +355,12 @@ function drawChart() {
   const height =
     300;
 
-
   if (width <= 0) {
     return;
   }
 
-
   const ratio =
     window.devicePixelRatio || 1;
-
 
   canvas.width =
     width * ratio;
@@ -385,7 +378,9 @@ function drawChart() {
   );
 
 
-  // Gemeinsame Tage finden
+  // ---------------------------------------------------
+  // GEMEINSAME TAGE
+  // ---------------------------------------------------
 
   const dates =
     Object.keys(savedSmaData)
@@ -431,7 +426,6 @@ function drawChart() {
   const extra =
     (max - min) * 0.10;
 
-
   min -= extra;
   max += extra;
 
@@ -457,7 +451,9 @@ function drawChart() {
   );
 
 
-  // Hilfslinien
+  // ---------------------------------------------------
+  // HILFSLINIEN
+  // ---------------------------------------------------
 
   ctx.strokeStyle =
     "#e5e7eb";
@@ -474,7 +470,6 @@ function drawChart() {
     const y =
       top +
       chartHeight * i / 4;
-
 
     ctx.beginPath();
 
@@ -495,7 +490,6 @@ function drawChart() {
       max -
       (max - min) * i / 4;
 
-
     ctx.fillStyle =
       "#9ca3af";
 
@@ -513,6 +507,10 @@ function drawChart() {
 
   }
 
+
+  // ---------------------------------------------------
+  // X / Y
+  // ---------------------------------------------------
 
   function getX(index) {
 
@@ -538,12 +536,15 @@ function drawChart() {
   }
 
 
+  // ---------------------------------------------------
   // SPY
+  // ---------------------------------------------------
 
   ctx.strokeStyle =
     "#111827";
 
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth =
+    2.5;
 
   ctx.beginPath();
 
@@ -559,9 +560,19 @@ function drawChart() {
 
 
       if (index === 0) {
-        ctx.moveTo(x, y);
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
       } else {
-        ctx.lineTo(x, y);
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
       }
 
     }
@@ -571,12 +582,15 @@ function drawChart() {
   ctx.stroke();
 
 
+  // ---------------------------------------------------
   // SMA200
+  // ---------------------------------------------------
 
   ctx.strokeStyle =
     "#2563eb";
 
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth =
+    2.5;
 
   ctx.beginPath();
 
@@ -592,9 +606,19 @@ function drawChart() {
 
 
       if (index === 0) {
-        ctx.moveTo(x, y);
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
       } else {
-        ctx.lineTo(x, y);
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
       }
 
     }
@@ -604,13 +628,16 @@ function drawChart() {
   ctx.stroke();
 
 
-  // Datum
+  // ---------------------------------------------------
+  // DATUM
+  // ---------------------------------------------------
 
   ctx.fillStyle =
     "#9ca3af";
 
   ctx.font =
     "10px Arial";
+
 
   ctx.textAlign =
     "left";
@@ -642,20 +669,41 @@ async function loadData() {
 
   try {
 
-    // -----------------------------------------------
+    document.getElementById("error")
+      .textContent = "";
+
+    document.getElementById("signal")
+      .textContent = "DATEN WERDEN GELADEN";
+
+    document.getElementById("signal")
+      .className = "signal neutral";
+
+
+    // =================================================
     // SPY
-    // -----------------------------------------------
+    // =================================================
+
+    const cacheBuster =
+      Date.now();
+
 
     const priceUrl =
       "https://www.alphavantage.co/query" +
       "?function=TIME_SERIES_DAILY" +
       "&symbol=" + SYMBOL +
       "&outputsize=compact" +
-      "&apikey=" + API_KEY;
+      "&datatype=json" +
+      "&apikey=" + API_KEY +
+      "&_=" + cacheBuster;
 
 
     const priceResponse =
-      await fetch(priceUrl);
+      await fetch(
+        priceUrl,
+        {
+          cache: "no-store"
+        }
+      );
 
 
     if (!priceResponse.ok) {
@@ -672,25 +720,29 @@ async function loadData() {
       await priceResponse.json();
 
 
-    checkApiResponse(priceData);
+    checkApiResponse(
+      priceData,
+      "SPY"
+    );
 
 
     const timeSeries =
-      priceData[
-        "Time Series (Daily)"
-      ];
+      priceData["Time Series (Daily)"];
 
 
     if (!timeSeries) {
 
+      console.log(
+        "Alpha Vantage SPY Antwort:",
+        priceData
+      );
+
       throw new Error(
-        "Keine SPY-Kursdaten erhalten."
+        "Alpha Vantage liefert keine SPY-Kursdaten."
       );
 
     }
 
-
-    // Daten für Chart speichern
 
     savedPriceData =
       timeSeries;
@@ -714,9 +766,9 @@ async function loadData() {
       );
 
 
-    // -----------------------------------------------
-    // 500 ms Pause
-    // -----------------------------------------------
+    // =================================================
+    // KURZE PAUSE
+    // =================================================
 
     await new Promise(
       resolve =>
@@ -727,9 +779,9 @@ async function loadData() {
     );
 
 
-    // -----------------------------------------------
+    // =================================================
     // SMA200
-    // -----------------------------------------------
+    // =================================================
 
     const smaUrl =
       "https://www.alphavantage.co/query" +
@@ -738,11 +790,18 @@ async function loadData() {
       "&interval=daily" +
       "&time_period=200" +
       "&series_type=close" +
-      "&apikey=" + API_KEY;
+      "&datatype=json" +
+      "&apikey=" + API_KEY +
+      "&_=" + Date.now();
 
 
     const smaResponse =
-      await fetch(smaUrl);
+      await fetch(
+        smaUrl,
+        {
+          cache: "no-store"
+        }
+      );
 
 
     if (!smaResponse.ok) {
@@ -759,7 +818,10 @@ async function loadData() {
       await smaResponse.json();
 
 
-    checkApiResponse(smaData);
+    checkApiResponse(
+      smaData,
+      "SMA200"
+    );
 
 
     const smaSeries =
@@ -770,14 +832,17 @@ async function loadData() {
 
     if (!smaSeries) {
 
+      console.log(
+        "Alpha Vantage SMA Antwort:",
+        smaData
+      );
+
       throw new Error(
         "Keine SMA200-Daten erhalten."
       );
 
     }
 
-
-    // Daten für Chart speichern
 
     savedSmaData =
       smaSeries;
@@ -801,9 +866,9 @@ async function loadData() {
       );
 
 
-    // -----------------------------------------------
-    // Abstand
-    // -----------------------------------------------
+    // =================================================
+    // ABSTAND
+    // =================================================
 
     const distance =
       (
@@ -812,9 +877,9 @@ async function loadData() {
       ) * 100;
 
 
-    // -----------------------------------------------
-    // Anzeige
-    // -----------------------------------------------
+    // =================================================
+    // ANZEIGE
+    // =================================================
 
     document.getElementById("price")
       .textContent =
@@ -833,9 +898,9 @@ async function loadData() {
       " %";
 
 
-    // -----------------------------------------------
-    // Regel
-    // -----------------------------------------------
+    // =================================================
+    // ZAHLGRAF-REGEL
+    // =================================================
 
     const signal =
       document.getElementById("signal");
@@ -860,16 +925,16 @@ async function loadData() {
     }
 
 
-    // -----------------------------------------------
-    // Chart
-    // -----------------------------------------------
+    // =================================================
+    // CHART
+    // =================================================
 
     drawChart();
 
 
-    // -----------------------------------------------
-    // Aktualisierung
-    // -----------------------------------------------
+    // =================================================
+    // AKTUALISIERUNG
+    // =================================================
 
     document.getElementById("updated")
       .textContent =
@@ -888,6 +953,7 @@ async function loadData() {
   catch (error) {
 
     console.error(
+      "Dashboard Fehler:",
       error
     );
 
@@ -901,15 +967,16 @@ async function loadData() {
 
 
 // =====================================================
-// EINMALIG LADEN
+// BEIM ÖFFNEN / REFRESH EINMAL LADEN
 // =====================================================
 
 loadData();
 
 
 // =====================================================
-// BEI DISPLAY-ÄNDERUNG NUR CHART NEU ZEICHNEN
-// KEINE NEUE API-ANFRAGE!
+// RESIZE
+// NUR CHART NEU ZEICHNEN
+// KEINE API-ANFRAGE
 // =====================================================
 
 window.addEventListener(
