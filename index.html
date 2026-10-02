@@ -2,211 +2,267 @@
 <html lang="de">
 
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<title>SMA200 Dashboard</title>
 
-  <title>SMA200 Dashboard</title>
+<style>
 
-  <style>
+* {
+  box-sizing: border-box;
+}
 
-    * {
-      box-sizing: border-box;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
 
-    .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-    }
+h1 {
+  text-align: center;
+  margin: 10px 0 25px;
+  font-size: 34px;
+}
 
-    h1 {
-      text-align: center;
-      margin: 10px 0 25px;
-      font-size: 34px;
-    }
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    }
+.label {
+  color: #6b7280;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
 
-    .label {
-      color: #6b7280;
-      font-size: 17px;
-      margin-bottom: 8px;
-    }
+.value {
+  font-size: 38px;
+  font-weight: bold;
+}
 
-    .value {
-      font-size: 38px;
-      font-weight: bold;
-    }
+.small-value {
+  font-size: 28px;
+  font-weight: bold;
+}
 
-    .small-value {
-      font-size: 28px;
-      font-weight: bold;
-    }
+.signal {
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+  padding: 20px;
+  border-radius: 16px;
+  margin-top: 12px;
+}
 
-    .signal {
-      text-align: center;
-      font-size: 25px;
-      font-weight: bold;
-      padding: 20px;
-      border-radius: 16px;
-      margin-top: 12px;
-    }
+.invested {
+  background: #dcfce7;
+  color: #166534;
+}
 
-    .invested {
-      background: #dcfce7;
-      color: #166534;
-    }
+.out {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
-    .out {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+.neutral {
+  background: #e5e7eb;
+  color: #374151;
+}
 
-    .neutral {
-      background: #e5e7eb;
-      color: #374151;
-    }
+.chart-card {
+  padding-bottom: 18px;
+}
 
-    .update {
-      text-align: center;
-      color: #6b7280;
-      font-size: 13px;
-      margin-top: 20px;
-      line-height: 1.5;
-    }
+.chart-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
 
-    .error {
-      color: #991b1b;
-      font-size: 14px;
-      margin-top: 10px;
-      text-align: center;
-    }
+canvas {
+  display: block;
+  width: 100%;
+  height: 300px;
+}
 
-  </style>
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #6b7280;
+}
 
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.price-dot {
+  background: #111827;
+}
+
+.sma-dot {
+  background: #2563eb;
+}
+
+.update {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+.error {
+  color: #991b1b;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+  word-break: break-word;
+}
+
+</style>
 </head>
 
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>SMA200 Dashboard</h1>
-
-
-    <div class="card">
-
-      <div class="label">
-        S&P 500 / SPY
-      </div>
-
-      <div
-        class="value"
-        id="price"
-      >
-        ...
-      </div>
-
-    </div>
+<h1>SMA200 Dashboard</h1>
 
 
-    <div class="card">
+<div class="card">
 
-      <div class="label">
-        SMA200
-      </div>
+  <div class="label">
+    S&P 500 / SPY
+  </div>
 
-      <div
-        class="small-value"
-        id="sma"
-      >
-        ...
-      </div>
+  <div class="value" id="price">
+    ...
+  </div>
 
-    </div>
+</div>
 
 
-    <div class="card">
+<div class="card">
 
-      <div class="label">
-        Abstand zum SMA200
-      </div>
+  <div class="label">
+    SMA200
+  </div>
 
-      <div
-        class="small-value"
-        id="distance"
-      >
-        ...
-      </div>
+  <div class="small-value" id="sma">
+    ...
+  </div>
 
-    </div>
+</div>
 
 
-    <div class="card">
+<div class="card">
 
-      <div class="label">
-        ZahlGraf-Regel
-      </div>
+  <div class="label">
+    Abstand zum SMA200
+  </div>
 
-      <div
-        id="signal"
-        class="signal neutral"
-      >
-        DATEN WERDEN GELADEN
-      </div>
+  <div class="small-value" id="distance">
+    ...
+  </div>
 
-    </div>
+</div>
 
 
-    <div class="update">
+<div class="card">
 
-      Letzte Aktualisierung:
+  <div class="label">
+    ZahlGraf-Regel
+  </div>
 
-      <br>
+  <div id="signal" class="signal neutral">
+    DATEN WERDEN GELADEN
+  </div>
 
-      <span id="updated">
-        ...
-      </span>
+</div>
 
-      <div
-        id="error"
-        class="error"
-      ></div>
 
-    </div>
+<div class="card chart-card">
+
+  <div class="label">
+    Verlauf SPY / SMA200
+  </div>
+
+  <div class="chart-wrapper">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="legend">
+
+    <span>
+      <span class="dot price-dot"></span>
+      SPY
+    </span>
+
+    <span>
+      <span class="dot sma-dot"></span>
+      SMA200
+    </span>
 
   </div>
 
+</div>
+
+
+<div class="update">
+
+  Letzte Aktualisierung:
+  <br>
+
+  <span id="updated">
+    ...
+  </span>
+
+  <div id="error" class="error"></div>
+
+</div>
+
+</div>
+
 
 <script>
-
 
 // =====================================================
 // EINSTELLUNGEN
 // =====================================================
 
-const API_KEY =
-  "700BBS7NX2KASU5T";
+const API_KEY = "700BBS7NX2KASU5";
+const SYMBOL = "SPY";
 
-const SYMBOL =
-  "SPY";
+
+// =====================================================
+// GLOBALE DATEN
+// =====================================================
+
+let savedPriceData = null;
+let savedSmaData = null;
 
 
 // =====================================================
@@ -232,34 +288,28 @@ function formatNumber(value) {
 
 function showError(message) {
 
-  document.getElementById(
-    "signal"
-  ).textContent =
+  document.getElementById("signal").textContent =
     "⚠️ DATENFEHLER";
 
-  document.getElementById(
-    "signal"
-  ).className =
+  document.getElementById("signal").className =
     "signal neutral";
 
-  document.getElementById(
-    "error"
-  ).textContent =
+  document.getElementById("error").textContent =
     message;
 
 }
 
 
 // =====================================================
-// API ANTWORT PRÜFEN
+// API-ANTWORT PRÜFEN
 // =====================================================
 
-function checkApiResponse(data) {
+function checkApiResponse(data, name) {
 
   if (data["Error Message"]) {
 
     throw new Error(
-      data["Error Message"]
+      name + ": " + data["Error Message"]
     );
 
   }
@@ -267,10 +317,346 @@ function checkApiResponse(data) {
   if (data["Note"]) {
 
     throw new Error(
-      "Alpha-Vantage API-Limit erreicht."
+      name + ": Alpha-Vantage API-Limit erreicht."
     );
 
   }
+
+  if (data["Information"]) {
+
+    throw new Error(
+      name + ": " + data["Information"]
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// CHART
+// =====================================================
+
+function drawChart() {
+
+  if (!savedPriceData || !savedSmaData) {
+    return;
+  }
+
+  const canvas =
+    document.getElementById("chart");
+
+  const ctx =
+    canvas.getContext("2d");
+
+  const width =
+    canvas.clientWidth;
+
+  const height =
+    300;
+
+  if (width <= 0) {
+    return;
+  }
+
+  const ratio =
+    window.devicePixelRatio || 1;
+
+  canvas.width =
+    width * ratio;
+
+  canvas.height =
+    height * ratio;
+
+  ctx.setTransform(
+    ratio,
+    0,
+    0,
+    ratio,
+    0,
+    0
+  );
+
+
+  // ---------------------------------------------------
+  // GEMEINSAME TAGE
+  // ---------------------------------------------------
+
+  const dates =
+    Object.keys(savedSmaData)
+      .filter(date =>
+        savedPriceData[date]
+      )
+      .sort()
+      .slice(-60);
+
+
+  if (dates.length < 2) {
+    return;
+  }
+
+
+  const prices =
+    dates.map(date =>
+      Number(
+        savedPriceData[date]["4. close"]
+      )
+    );
+
+
+  const smas =
+    dates.map(date =>
+      Number(
+        savedSmaData[date]["SMA"]
+      )
+    );
+
+
+  const values =
+    prices.concat(smas);
+
+
+  let min =
+    Math.min(...values);
+
+  let max =
+    Math.max(...values);
+
+
+  const extra =
+    (max - min) * 0.10;
+
+  min -= extra;
+  max += extra;
+
+
+  const left = 45;
+  const right = 10;
+  const top = 15;
+  const bottom = 30;
+
+
+  const chartWidth =
+    width - left - right;
+
+  const chartHeight =
+    height - top - bottom;
+
+
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  // ---------------------------------------------------
+  // HILFSLINIEN
+  // ---------------------------------------------------
+
+  ctx.strokeStyle =
+    "#e5e7eb";
+
+  ctx.lineWidth = 1;
+
+
+  for (
+    let i = 0;
+    i <= 4;
+    i++
+  ) {
+
+    const y =
+      top +
+      chartHeight * i / 4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      left,
+      y
+    );
+
+    ctx.lineTo(
+      width - right,
+      y
+    );
+
+    ctx.stroke();
+
+
+    const value =
+      max -
+      (max - min) * i / 4;
+
+    ctx.fillStyle =
+      "#9ca3af";
+
+    ctx.font =
+      "11px Arial";
+
+    ctx.textAlign =
+      "right";
+
+    ctx.fillText(
+      value.toFixed(0),
+      left - 6,
+      y + 4
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // X / Y
+  // ---------------------------------------------------
+
+  function getX(index) {
+
+    return (
+      left +
+      index /
+      (dates.length - 1) *
+      chartWidth
+    );
+
+  }
+
+
+  function getY(value) {
+
+    return (
+      top +
+      (max - value) /
+      (max - min) *
+      chartHeight
+    );
+
+  }
+
+
+  // ---------------------------------------------------
+  // SPY
+  // ---------------------------------------------------
+
+  ctx.strokeStyle =
+    "#111827";
+
+  ctx.lineWidth =
+    2.5;
+
+  ctx.beginPath();
+
+
+  prices.forEach(
+    (value, index) => {
+
+      const x =
+        getX(index);
+
+      const y =
+        getY(value);
+
+
+      if (index === 0) {
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
+      } else {
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
+      }
+
+    }
+  );
+
+
+  ctx.stroke();
+
+
+  // ---------------------------------------------------
+  // SMA200
+  // ---------------------------------------------------
+
+  ctx.strokeStyle =
+    "#2563eb";
+
+  ctx.lineWidth =
+    2.5;
+
+  ctx.beginPath();
+
+
+  smas.forEach(
+    (value, index) => {
+
+      const x =
+        getX(index);
+
+      const y =
+        getY(value);
+
+
+      if (index === 0) {
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
+      } else {
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
+      }
+
+    }
+  );
+
+
+  ctx.stroke();
+
+
+  // ---------------------------------------------------
+  // DATUM
+  // ---------------------------------------------------
+
+  ctx.fillStyle =
+    "#9ca3af";
+
+  ctx.font =
+    "10px Arial";
+
+
+  ctx.textAlign =
+    "left";
+
+  ctx.fillText(
+    dates[0],
+    left,
+    height - 8
+  );
+
+
+  ctx.textAlign =
+    "right";
+
+  ctx.fillText(
+    dates[dates.length - 1],
+    width - right,
+    height - 8
+  );
 
 }
 
@@ -283,21 +669,41 @@ async function loadData() {
 
   try {
 
+    document.getElementById("error")
+      .textContent = "";
+
+    document.getElementById("signal")
+      .textContent = "DATEN WERDEN GELADEN";
+
+    document.getElementById("signal")
+      .className = "signal neutral";
+
 
     // =================================================
-    // 1. KURS LADEN
+    // SPY
     // =================================================
+
+    const cacheBuster =
+      Date.now();
+
 
     const priceUrl =
       "https://www.alphavantage.co/query" +
       "?function=TIME_SERIES_DAILY" +
       "&symbol=" + SYMBOL +
       "&outputsize=compact" +
-      "&apikey=" + API_KEY;
+      "&datatype=json" +
+      "&apikey=" + API_KEY +
+      "&_=" + cacheBuster;
 
 
     const priceResponse =
-      await fetch(priceUrl);
+      await fetch(
+        priceUrl,
+        {
+          cache: "no-store"
+        }
+      );
 
 
     if (!priceResponse.ok) {
@@ -315,23 +721,31 @@ async function loadData() {
 
 
     checkApiResponse(
-      priceData
+      priceData,
+      "SPY"
     );
 
 
     const timeSeries =
-      priceData[
-        "Time Series (Daily)"
-      ];
+      priceData["Time Series (Daily)"];
 
 
     if (!timeSeries) {
 
+      console.log(
+        "Alpha Vantage SPY Antwort:",
+        priceData
+      );
+
       throw new Error(
-        "Keine SPY-Kursdaten erhalten."
+        "Alpha Vantage liefert keine SPY-Kursdaten."
       );
 
     }
+
+
+    savedPriceData =
+      timeSeries;
 
 
     const dates =
@@ -353,20 +767,20 @@ async function loadData() {
 
 
     // =================================================
-    // 2. KURZ PAUSE
+    // KURZE PAUSE
     // =================================================
-
-    // Verhindert, dass beide API-Anfragen
-    // gleichzeitig rausgehen.
 
     await new Promise(
       resolve =>
-        setTimeout(resolve, 500)
+        setTimeout(
+          resolve,
+          500
+        )
     );
 
 
     // =================================================
-    // 3. SMA200 LADEN
+    // SMA200
     // =================================================
 
     const smaUrl =
@@ -376,17 +790,24 @@ async function loadData() {
       "&interval=daily" +
       "&time_period=200" +
       "&series_type=close" +
-      "&apikey=" + API_KEY;
+      "&datatype=json" +
+      "&apikey=" + API_KEY +
+      "&_=" + Date.now();
 
 
     const smaResponse =
-      await fetch(smaUrl);
+      await fetch(
+        smaUrl,
+        {
+          cache: "no-store"
+        }
+      );
 
 
     if (!smaResponse.ok) {
 
       throw new Error(
-        "SMA-Abruf HTTP-Fehler: " +
+        "SMA HTTP-Fehler: " +
         smaResponse.status
       );
 
@@ -398,7 +819,8 @@ async function loadData() {
 
 
     checkApiResponse(
-      smaData
+      smaData,
+      "SMA200"
     );
 
 
@@ -410,11 +832,20 @@ async function loadData() {
 
     if (!smaSeries) {
 
+      console.log(
+        "Alpha Vantage SMA Antwort:",
+        smaData
+      );
+
       throw new Error(
-        "Alpha Vantage hat keine SMA200-Daten geliefert."
+        "Keine SMA200-Daten erhalten."
       );
 
     }
+
+
+    savedSmaData =
+      smaSeries;
 
 
     const smaDates =
@@ -436,23 +867,7 @@ async function loadData() {
 
 
     // =================================================
-    // 4. WERTE PRÜFEN
-    // =================================================
-
-    if (
-      !Number.isFinite(price) ||
-      !Number.isFinite(sma200)
-    ) {
-
-      throw new Error(
-        "Ungültige Kursdaten."
-      );
-
-    }
-
-
-    // =================================================
-    // 5. ABSTAND BERECHNEN
+    // ABSTAND
     // =================================================
 
     const distance =
@@ -463,37 +878,32 @@ async function loadData() {
 
 
     // =================================================
-    // 6. ANZEIGE
+    // ANZEIGE
     // =================================================
 
-    document.getElementById(
-      "price"
-    ).textContent =
+    document.getElementById("price")
+      .textContent =
       formatNumber(price);
 
 
-    document.getElementById(
-      "sma"
-    ).textContent =
+    document.getElementById("sma")
+      .textContent =
       formatNumber(sma200);
 
 
-    document.getElementById(
-      "distance"
-    ).textContent =
+    document.getElementById("distance")
+      .textContent =
       (distance >= 0 ? "+" : "") +
       distance.toFixed(2) +
       " %";
 
 
     // =================================================
-    // 7. SIGNAL
+    // ZAHLGRAF-REGEL
     // =================================================
 
     const signal =
-      document.getElementById(
-        "signal"
-      );
+      document.getElementById("signal");
 
 
     if (price >= sma200) {
@@ -516,22 +926,26 @@ async function loadData() {
 
 
     // =================================================
-    // 8. STATUS
+    // CHART
     // =================================================
 
-    document.getElementById(
-      "updated"
-    ).textContent =
+    drawChart();
+
+
+    // =================================================
+    // AKTUALISIERUNG
+    // =================================================
+
+    document.getElementById("updated")
+      .textContent =
       "Kurs: " +
       latestDate +
       " | SMA200: " +
       smaDate;
 
 
-    document.getElementById(
-      "error"
-    ).textContent =
-      "";
+    document.getElementById("error")
+      .textContent = "";
 
 
   }
@@ -539,7 +953,7 @@ async function loadData() {
   catch (error) {
 
     console.error(
-      "SMA200 Fehler:",
+      "Dashboard Fehler:",
       error
     );
 
@@ -553,14 +967,24 @@ async function loadData() {
 
 
 // =====================================================
-// START
+// BEIM ÖFFNEN / REFRESH EINMAL LADEN
 // =====================================================
 
 loadData();
 
 
+// =====================================================
+// RESIZE
+// NUR CHART NEU ZEICHNEN
+// KEINE API-ANFRAGE
+// =====================================================
+
+window.addEventListener(
+  "resize",
+  drawChart
+);
+
 </script>
 
 </body>
-
 </html>
